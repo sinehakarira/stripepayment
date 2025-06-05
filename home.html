@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechGadget Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://js.stripe.com/basil/stripe.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        
+        .cart-items-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        .cart-items-container::-webkit-scrollbar-track {
+            background: #e0e0e0;
+            border-radius: 10px;
+        }
+        .cart-items-container::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        .cart-items-container::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        iframe {
+        width: 100%;
+        height: 500px;
+        border: none;
+        margin-top: 20px;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+    <header class="bg-gradient-to-r from-blue-600 to-purple-700 text-white p-4 shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center px-4">
+            <h1 class="text-3xl font-bold tracking-tight">TechGadget Hub</h1>
+            <nav>
+                <button id="cart-button" class="relative p-2 rounded-full hover:bg-white hover:bg-opacity-20 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-white">
+                    <i class="fas fa-shopping-cart text-2xl"></i>
+                    <span id="cart-count" class="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center -mt-1 -mr-1">0</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto flex-grow p-6">
+        <h2 class="text-4xl font-extrabold text-gray-800 mb-8 text-center">Explore Our Latest Tech</h2>
+        <div id="product-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            </div>
+    </main>
+
+    <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-full sm:w-96 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out z-50 flex flex-col">
+        <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+            <h3 class="text-2xl font-semibold text-gray-800">Your Cart</h3>
+            <button id="close-cart-button" class="text-gray-500 hover:text-gray-700 text-3xl focus:outline-none">
+                &times;
+            </button>
+            <a href="https://buy.stripe.com/test_3cIeVd7cjasegGlguxg7e00" target="_blank">
+                <button>Buy Now</button>
+              </a>
+        </div>
+        <div id="cart-items-container" class="flex-grow overflow-y-auto p-6 space-y-4 cart-items-container">
+            <p id="empty-cart-message" class="text-gray-500 text-center py-8">Your cart is empty.</p>
+        </div>
+        <div class="p-6 border-t border-gray-200">
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-xl font-semibold text-gray-800">Total:</span>
+                <span id="cart-total" class="text-2xl font-bold text-blue-600">$0.00</span>
+            </div>
+            <button onclick="document.getElementById('stripe-frame').style.display = 'block'" class="w-full bg-green-600 text-white py-3 px-6 rounded-lg text-lg font-semibold hover:bg-green-700 transition-colors duration-200 shadow-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-75">
+                Proceed to Checkout
+            </button>
+              <iframe id="stripe-frame" src="stripe-payment.html" style="display: none;"></iframe>
+            
+        </div>
+    </div>
+
+    <footer class="bg-gray-800 text-white p-6 mt-8">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2025 TechGadget Hub. All rights reserved.</p>
+            <div class="flex justify-center space-x-4 mt-4">
+                <a href="#" class="text-gray-400 hover:text-white transition-colors duration-200"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="text-gray-400 hover:text-white transition-colors duration-200"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="text-gray-400 hover:text-white transition-colors duration-200"><i class="fab fa-instagram"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Array of product data
+        const products = [
+            {
+                id: 1,
+                name: "Wireless Noise-Cancelling Headphones",
+                price: 249.99,
+                image: "./headphone.jpeg",
+                description: "Immersive sound, supreme comfort, and advanced noise cancellation for an unparalleled listening experience."
+            },
+            {
+                id: 2,
+                name: "Smartwatch with Health Tracking",
+                price: 189.99,
+                image: "./smart.jpeg",
+                description: "Track your fitness, monitor heart rate, and stay connected with notifications on your wrist."
+            },
+            {
+                id: 3,
+                name: "Ultra-Thin Laptop (13-inch)",
+                price: 1299.00,
+                image: "./laptop.jpg",
+                description: "Powerful performance in a sleek, lightweight design, perfect for productivity on the go."
+            },
+            {
+                id: 4,
+                name: "Portable Bluetooth Speaker",
+                price: 79.99,
+                image: "./speaker.jpeg",
+                description: "Crisp audio and deep bass in a compact, durable design, ready for any adventure."
+            },
+            {
+                id: 5,
+                name: "4K UHD Smart TV (55-inch)",
+                price: 799.00,
+                image: "./images.jpeg",
+                description: "Stunning visuals and smart features bring your entertainment to life with incredible clarity."
+            },
+            {
+                id: 6,
+                name: "Gaming Mouse with RGB Lighting",
+                price: 59.99,
+                image: "./gaming.jpeg",
+                description: "Precision tracking, customizable buttons, and vibrant RGB lighting for an immersive gaming experience."
+            },
+            {
+                id: 7,
+                name: "External SSD (1TB)",
+                price: 119.00,
+                image: "./external.jpeg",
+                description: "Blazing-fast data transfer speeds and robust storage for all your files and backups."
+            },
+            {
+                id: 8,
+                name: "Wireless Charging Pad",
+                price: 34.99,
+                image: "./charger.jpeg",
+                description: "Effortlessly charge your compatible devices with this sleek and convenient wireless charging pad."
+            }
+        ];
+
+        // Global variables for DOM elements
+        const productListDiv = document.getElementById('product-list');
+        const cartSidebar = document.getElementById('cart-sidebar');
+        const cartButton = document.getElementById('cart-button');
+        const closeCartButton = document.getElementById('close-cart-button');
+        const cartItemsContainer = document.getElementById('cart-items-container');
+        const cartTotalSpan = document.getElementById('cart-total');
+        const cartCountSpan = document.getElementById('cart-count');
+        const emptyCartMessage = document.getElementById('empty-cart-message');
+
+        // Shopping cart array
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+        /**
+         * Renders all products on the main page.
+         */
+        function renderProducts() {
+            productListDiv.innerHTML = ''; // Clear existing products
+            products.forEach(product => {
+                const productCard = `
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300 ease-in-out flex flex-col">
+                        <img src="${product.image}" alt="${product.name}" class="w-full  object-cover object-center rounded-t-xl">
+                        <div class="p-6 flex flex-col flex-grow">
+                            <h3 class="text-xl font-semibold text-gray-900 mb-2">${product.name}</h3>
+                            <p class="text-gray-600 text-sm mb-4 flex-grow">${product.description}</p>
+                            <div class="flex justify-between items-center mt-auto">
+                                <span class="text-2xl font-bold text-blue-700">$${product.price.toFixed(2)}</span>
+                                <button data-product-id="${product.id}" class="add-to-cart-btn bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75">
+                                    <i class="fas fa-cart-plus mr-2"></i>Add to Cart
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                productListDiv.insertAdjacentHTML('beforeend', productCard);
+            });
+
+            // Add event listeners to all "Add to Cart" buttons
+            document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const productId = parseInt(event.currentTarget.dataset.productId);
+                    addToCart(productId);
+                });
+            });
+        }
+
+        /**
+         * Adds a product to the shopping cart.
+         * @param {number} productId - The ID of the product to add.
+         */
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            if (product) {
+                const existingCartItem = cart.find(item => item.id === productId);
+                if (existingCartItem) {
+                    existingCartItem.quantity++;
+                } else {
+                    cart.push({ ...product, quantity: 1 });
+                }
+                saveCart();
+                renderCart();
+                showCart(); // Show cart when an item is added
+            }
+        }
+
+        /**
+         * Removes a product from the shopping cart.
+         * @param {number} productId - The ID of the product to remove.
+         */
+        function removeFromCart(productId) {
+            cart = cart.filter(item => item.id !== productId);
+            saveCart();
+            renderCart();
+        }
+
+        /**
+         * Updates the quantity of a product in the cart.
+         * @param {number} productId - The ID of the product.
+         * @param {number} change - The amount to change the quantity by (+1 or -1).
+         */
+        function updateQuantity(productId, change) {
+            const item = cart.find(item => item.id === productId);
+            if (item) {
+                item.quantity += change;
+                if (item.quantity <= 0) {
+                    removeFromCart(productId);
+                } else {
+                    saveCart();
+                    renderCart();
+                }
+            }
+        }
+
+        /**
+         * Saves the current cart state to local storage.
+         */
+        function saveCart() {
+            localStorage.setItem('cart', JSON.stringify(cart));
+        }
+
+        /**
+         * Renders the items in the shopping cart sidebar.
+         */
+        function renderCart() {
+            cartItemsContainer.innerHTML = ''; // Clear existing cart items
+            let total = 0;
+
+            if (cart.length === 0) {
+                emptyCartMessage.style.display = 'block';
+            } else {
+                emptyCartMessage.style.display = 'none';
+                cart.forEach(item => {
+                    const itemTotal = item.price * item.quantity;
+                    total += itemTotal;
+
+                    const cartItemHtml = `
+                        <div class="flex items-center bg-gray-50 p-4 rounded-lg shadow-sm">
+                            <img src="${item.image}" alt="${item.name}" class="w-20 h-20 object-cover rounded-md mr-4">
+                            <div class="flex-grow">
+                                <h4 class="font-medium text-gray-900">${item.name}</h4>
+                                <p class="text-gray-700 text-sm">$${item.price.toFixed(2)} x ${item.quantity}</p>
+                                <p class="text-blue-600 font-semibold mt-1">$${itemTotal.toFixed(2)}</p>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button data-product-id="${item.id}" data-change="-1" class="update-quantity-btn bg-gray-200 text-gray-700 px-2 py-1 rounded-md hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400">-</button>
+                                <span class="font-bold text-gray-800">${item.quantity}</span>
+                                <button data-product-id="${item.id}" data-change="1" class="update-quantity-btn bg-gray-200 text-gray-700 px-2 py-1 rounded-md hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400">+</button>
+                                <button data-product-id="${item.id}" class="remove-from-cart-btn text-red-500 hover:text-red-700 ml-2 focus:outline-none focus:ring-2 focus:ring-red-300">
+                                    <i class="fas fa-trash-alt text-lg"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    cartItemsContainer.insertAdjacentHTML('beforeend', cartItemHtml);
+                });
+            }
+
+            cartTotalSpan.textContent = `$${total.toFixed(2)}`;
+            cartCountSpan.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+            // Add event listeners for quantity updates and removal
+            document.querySelectorAll('.update-quantity-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const productId = parseInt(event.currentTarget.dataset.productId);
+                    const change = parseInt(event.currentTarget.dataset.change);
+                    updateQuantity(productId, change);
+                });
+            });
+
+            document.querySelectorAll('.remove-from-cart-btn').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const productId = parseInt(event.currentTarget.dataset.productId);
+                    removeFromCart(productId);
+                });
+            });
+        }
+
+        /**
+         * Shows the shopping cart sidebar.
+         */
+        function showCart() {
+            cartSidebar.classList.remove('translate-x-full');
+            cartSidebar.classList.add('translate-x-0');
+        }
+
+        /**
+         * Hides the shopping cart sidebar.
+         */
+        function hideCart() {
+            cartSidebar.classList.remove('translate-x-0');
+            cartSidebar.classList.add('translate-x-full');
+        }
+
+        // Event Listeners for cart visibility
+        cartButton.addEventListener('click', showCart);
+        closeCartButton.addEventListener('click', hideCart);
+
+        // Initial rendering on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            renderProducts();
+            renderCart();
+        });
+
+        // Placeholder for checkout functionality
+        document.getElementById('checkout-button').addEventListener('click', () => {
+            var stripe = Stripe('pk_test_TYooMQauvdEDq54NiTphI7jx');
+            var elements = stripe.elements({
+            clientSecret: 'CLIENT_SECRET',
+            });
+            var elements = stripe.elements({
+                mode: 'payment',
+                 currency: 'usd',
+                 amount: 1099,
+            });
+            // In a real application, this would initiate the Stripe checkout process.
+            // For now, we'll just show a message.
+            alert('Proceeding to checkout! (Stripe integration coming soon)');
+            // You would typically send the cart data to your backend here.
+            console.log('Cart for checkout:', cart);
+        });
+
+          const iframe = document.getElementById('stripe-frame');
+         const checkoutBtn = document.getElementById('checkout-button');
+
+    // Wait 3 seconds and check if iframe is loaded correctly
+    setTimeout(() => {
+      try {
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+        if (!iframeDoc || !iframeDoc.body || iframeDoc.body.innerHTML.trim() === '') {
+          throw new Error("Iframe blocked or empty");
+        }
+        // iframe loaded okay, keep checkout button hidden
+      } catch (e) {
+        // iframe blocked or failed, hide iframe, show checkout button
+        iframe.style.display = 'none';
+        checkoutBtn.style.display = 'inline-block';
+      }
+    }, 3000);
+
+    // Optionally handle immediate iframe load error
+    iframe.onerror = function() {
+      iframe.style.display = 'none';
+      checkoutBtn.style.display = 'inline-block';
+    };
+
+    </script>
+</body>
+</html>

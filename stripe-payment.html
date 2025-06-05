@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Stripe Payment Form</title>
+  <script src="https://js.stripe.com/v3/"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 500px;
+      margin: 40px auto;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    .stripe-input {
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 6px;
+      background-color: white;
+    }
+
+    #card-errors {
+      color: red;
+      margin-top: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #6772e5;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #5469d4;
+    }
+  </style>
+</head>
+<body>
+  <h2>Pay with Card</h2>
+  <form id="payment-form">
+    <div class="form-group">
+      <label for="card-number">Card Number</label>
+      <div id="card-number" class="stripe-input"></div>
+    </div>
+
+    <div class="form-group">
+      <label for="card-expiry">Expiration Date</label>
+      <div id="card-expiry" class="stripe-input"></div>
+    </div>
+
+    <div class="form-group">
+      <label for="card-cvc">CVC</label>
+      <div id="card-cvc" class="stripe-input"></div>
+    </div>
+
+    <div id="card-errors" role="alert"></div>
+    <button type="submit">Pay</button>
+  </form>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // Replace with your real Stripe publishable key
+      const stripe = Stripe("pk_test_51RSN6QH9U0yAcZTctqlMKe2UTCMwchXSJwtK91HUwN9ylqexRmlIbN8u17xYxQOg4F7Pij1vUqn5umwd6DnxTBsb00KTOUex0D");
+
+      const elements = stripe.elements();
+
+      const style = {
+        base: {
+          fontSize: '16px',
+          color: '#32325d',
+          '::placeholder': {
+            color: '#aab7c4',
+          },
+        },
+        invalid: {
+          color: '#fa755a',
+          iconColor: '#fa755a',
+        },
+      };
+
+      const cardNumber = elements.create("cardNumber", { style });
+      const cardExpiry = elements.create("cardExpiry", { style });
+      const cardCvc = elements.create("cardCvc", { style });
+
+      cardNumber.mount("#card-number");
+      cardExpiry.mount("#card-expiry");
+      cardCvc.mount("#card-cvc");
+
+      const displayError = document.getElementById("card-errors");
+
+      const handleError = event => {
+        displayError.textContent = event.error ? event.error.message : "";
+      };
+
+      cardNumber.on("change", handleError);
+      cardExpiry.on("change", handleError);
+      cardCvc.on("change", handleError);
+
+      const form = document.getElementById("payment-form");
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const { paymentMethod, error } = await stripe.createPaymentMethod({
+          type: "card",
+          card: cardNumber,
+        });
+
+        if (error) {
+          displayError.textContent = error.message;
+        } else {
+          console.log("PaymentMethod ID:", paymentMethod.id);
+          alert("Payment method created successfully!\nCheck console for ID.");
+          // You would send `paymentMethod.id` to your backend here.
+        }
+      });
+    });
+  </script>
+</body>
+</html>
